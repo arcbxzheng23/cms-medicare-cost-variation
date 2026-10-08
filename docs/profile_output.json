@@ -1,0 +1,319 @@
+{
+  "file": "MUP_INP_RY26_P03_V10_DY24_PrvSvc.CSV",
+  "bytes": 37976130,
+  "encoding": "utf-8",
+  "has_bom": false,
+  "line_endings": "LF",
+  "rows": 145879,
+  "columns": [
+    "Rndrng_Prvdr_CCN",
+    "Rndrng_Prvdr_Org_Name",
+    "Rndrng_Prvdr_City",
+    "Rndrng_Prvdr_St",
+    "Rndrng_Prvdr_State_FIPS",
+    "Rndrng_Prvdr_Zip5",
+    "Rndrng_Prvdr_State_Abrvtn",
+    "Rndrng_Prvdr_RUCA",
+    "Rndrng_Prvdr_RUCA_Desc",
+    "DRG_Cd",
+    "DRG_Desc",
+    "Tot_Dschrgs",
+    "Avg_Submtd_Cvrd_Chrg",
+    "Avg_Tot_Pymt_Amt",
+    "Avg_Mdcr_Pymt_Amt"
+  ],
+  "per_column": {
+    "Rndrng_Prvdr_CCN": {
+      "non_empty": 145879,
+      "blank_or_empty": 0,
+      "leading_trailing_ws": 0,
+      "distinct": 2906,
+      "min_len": 6,
+      "max_len": 6,
+      "non_ascii": 0,
+      "top5": {
+        "100007": 387,
+        "330101": 373,
+        "330214": 356,
+        "240010": 309,
+        "220071": 298
+      }
+    },
+    "Rndrng_Prvdr_Org_Name": {
+      "non_empty": 145879,
+      "blank_or_empty": 0,
+      "leading_trailing_ws": 0,
+      "distinct": 2845,
+      "min_len": 3,
+      "max_len": 50,
+      "non_ascii": 2,
+      "top5": {
+        "Methodist Hospital": 423,
+        "Adventhealth Orlando": 387,
+        "New York-Presbyterian Hospital": 373,
+        "Nyu Langone Hospitals": 356,
+        "Memorial Medical Center": 309
+      }
+    },
+    "Rndrng_Prvdr_City": {
+      "non_empty": 145879,
+      "blank_or_empty": 0,
+      "leading_trailing_ws": 0,
+      "distinct": 1762,
+      "min_len": 3,
+      "max_len": 20,
+      "non_ascii": 0,
+      "top5": {
+        "New York": 1397,
+        "Baltimore": 1143,
+        "Boston": 1108,
+        "Chicago": 1062,
+        "Houston": 1032
+      }
+    },
+    "Rndrng_Prvdr_St": {
+      "non_empty": 145879,
+      "blank_or_empty": 0,
+      "leading_trailing_ws": 0,
+      "distinct": 2897,
+      "min_len": 9,
+      "max_len": 43,
+      "non_ascii": 0,
+      "top5": {
+        "601 E Rollins St": 387,
+        "1 Medical Center Drive": 379,
+        "525 East 68th Street": 373,
+        "550 First Avenue": 356,
+        "1216 Second Street Southwest": 309
+      }
+    },
+    "Rndrng_Prvdr_State_FIPS": {
+      "non_empty": 145879,
+      "blank_or_empty": 0,
+      "leading_trailing_ws": 0,
+      "distinct": 51,
+      "min_len": 2,
+      "max_len": 2,
+      "non_ascii": 0,
+      "top5": {
+        "06": 13302,
+        "12": 12045,
+        "48": 9955,
+        "36": 8310,
+        "42": 6904
+      }
+    },
+    "Rndrng_Prvdr_Zip5": {
+      "non_empty": 145879,
+      "blank_or_empty": 0,
+      "leading_trailing_ws": 0,
+      "distinct": 2687,
+      "min_len": 5,
+      "max_len": 5,
+      "non_ascii": 0,
+      "top5": {
+        "77030": 498,
+        "78229": 494,
+        "40202": 437,
+        "76104": 402,
+        "10016": 400
+      }
+    },
+    "Rndrng_Prvdr_State_Abrvtn": {
+      "non_empty": 145879,
+      "blank_or_empty": 0,
+      "leading_trailing_ws": 0,
+      "distinct": 51,
+      "min_len": 2,
+      "max_len": 2,
+      "non_ascii": 0,
+      "top5": {
+        "CA": 13302,
+        "FL": 12045,
+        "TX": 9955,
+        "NY": 8310,
+        "PA": 6904
+      }
+    },
+    "Rndrng_Prvdr_RUCA": {
+      "non_empty": 145879,
+      "blank_or_empty": 0,
+      "leading_trailing_ws": 0,
+      "distinct": 19,
+      "min_len": 1,
+      "max_len": 4,
+      "non_ascii": 0,
+      "top5": {
+        "1": 127031,
+        "4": 10265,
+        "1.1": 2407,
+        "2": 2243,
+        "7": 1335
+      }
+    },
+    "Rndrng_Prvdr_RUCA_Desc": {
+      "non_empty": 145879,
+      "blank_or_empty": 0,
+      "leading_trailing_ws": 0,
+      "distinct": 15,
+      "min_len": 7,
+      "max_len": 100,
+      "non_ascii": 0,
+      "top5": {
+        "Metropolitan area core: primary flow within an urbanized area of 50,000 and greater": 127031,
+        "Micropolitan area core: primary flow within an urban cluster of 10,000 to 49,999": 10265,
+        "Secondary flow 30% to <50% to a larger urbanized area of 50,000 and greater": 2443,
+        "Metropolitan area high commuting: primary flow 30% or more to a urbanized area of 50,000 and greater": 2243,
+        "Small town core: primary flow within an urban cluster of 2,500 to 9,999": 1335
+      }
+    },
+    "DRG_Cd": {
+      "non_empty": 145879,
+      "blank_or_empty": 0,
+      "leading_trailing_ws": 0,
+      "distinct": 540,
+      "min_len": 3,
+      "max_len": 3,
+      "non_ascii": 0,
+      "top5": {
+        "871": 2661,
+        "291": 2587,
+        "193": 2442,
+        "177": 2332,
+        "872": 2216
+      }
+    },
+    "DRG_Desc": {
+      "non_empty": 145879,
+      "blank_or_empty": 0,
+      "leading_trailing_ws": 0,
+      "distinct": 528,
+      "min_len": 9,
+      "max_len": 88,
+      "non_ascii": 0,
+      "top5": {
+        "SEPTICEMIA OR SEVERE SEPSIS WITHOUT MV >96 HOURS WITH MCC": 2661,
+        "HEART FAILURE AND SHOCK WITH MCC": 2587,
+        "SIMPLE PNEUMONIA AND PLEURISY WITH MCC": 2442,
+        "RESPIRATORY INFECTIONS AND INFLAMMATIONS WITH MCC": 2332,
+        "SEPTICEMIA OR SEVERE SEPSIS WITHOUT MV >96 HOURS WITHOUT MCC": 2216
+      }
+    },
+    "Tot_Dschrgs": {
+      "non_empty": 145879,
+      "blank_or_empty": 0,
+      "leading_trailing_ws": 0,
+      "distinct": 668,
+      "min_len": 2,
+      "max_len": 4,
+      "non_ascii": 0,
+      "top5": {
+        "11": 11968,
+        "12": 10498,
+        "13": 9191,
+        "14": 8076,
+        "15": 7173
+      },
+      "convert_failures": 0,
+      "has_dollar_or_comma": 0,
+      "decimals_max": 0,
+      "min": 11.0,
+      "p25": 14.0,
+      "median": 20.0,
+      "mean": 33.94923875266488,
+      "p75": 35.0,
+      "p99": 235.0,
+      "max": 3400.0,
+      "std": 50.57168176551768,
+      "zeros": 0,
+      "negatives": 0
+    },
+    "Avg_Submtd_Cvrd_Chrg": {
+      "non_empty": 145879,
+      "blank_or_empty": 0,
+      "leading_trailing_ws": 0,
+      "distinct": 145354,
+      "min_len": 4,
+      "max_len": 12,
+      "non_ascii": 0,
+      "top5": {
+        "33551": 3,
+        "94154": 3,
+        "140048": 3,
+        "28457.5": 2,
+        "48212.416667": 2
+      },
+      "convert_failures": 0,
+      "has_dollar_or_comma": 0,
+      "decimals_max": 7,
+      "min": 2058.3846154,
+      "p25": 36845.231727499995,
+      "median": 61619.589286,
+      "mean": 96366.09310434174,
+      "p75": 110042.33814499999,
+      "p99": 561050.4023414003,
+      "max": 7196636.9375,
+      "std": 129334.70438456115,
+      "zeros": 0,
+      "negatives": 0
+    },
+    "Avg_Tot_Pymt_Amt": {
+      "non_empty": 145879,
+      "blank_or_empty": 0,
+      "leading_trailing_ws": 0,
+      "distinct": 142991,
+      "min_len": 4,
+      "max_len": 12,
+      "non_ascii": 0,
+      "top5": {
+        "6231": 4,
+        "16850": 4,
+        "6334": 4,
+        "7840": 4,
+        "7344": 4
+      },
+      "convert_failures": 0,
+      "has_dollar_or_comma": 0,
+      "decimals_max": 7,
+      "min": 1849.0769231,
+      "p25": 9057.23160175,
+      "median": 13217.416667,
+      "mean": 19151.321300928,
+      "p75": 20959.948484499997,
+      "p99": 91384.49539888004,
+      "max": 1443309.6667,
+      "std": 22673.388037233846,
+      "zeros": 0,
+      "negatives": 0
+    },
+    "Avg_Mdcr_Pymt_Amt": {
+      "non_empty": 145879,
+      "blank_or_empty": 0,
+      "leading_trailing_ws": 0,
+      "distinct": 142662,
+      "min_len": 4,
+      "max_len": 12,
+      "non_ascii": 0,
+      "top5": {
+        "5547.5454545": 5,
+        "5578": 5,
+        "5081": 4,
+        "7339.0909091": 4,
+        "6571": 4
+      },
+      "convert_failures": 0,
+      "has_dollar_or_comma": 0,
+      "decimals_max": 7,
+      "min": 386.8,
+      "p25": 7078.12916665,
+      "median": 10850.7,
+      "mean": 15782.652359851134,
+      "p75": 17252.625,
+      "p99": 76379.44000008002,
+      "max": 1436667.8333,
+      "std": 19662.871226782398,
+      "zeros": 0,
+      "negatives": 0
+    }
+  }
+}

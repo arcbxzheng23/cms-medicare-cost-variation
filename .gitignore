@@ -1,0 +1,32 @@
+# ---- Data: never commit raw or derived data files ----
+# The CMS CSV is public but large (~tens of MB); the README explains how to download it.
+data/**
+!data/**/
+!data/**/.gitkeep
+*.csv
+*.CSV
+*.parquet
+*.xlsx
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.ipynb_checkpoints/
+
+# ---- Databricks ----
+.databricks/
+*.dbc
+
+# ---- Tableau (keep packaged .twbx out until final; extracts are large) ----
+*.hyper
+*.tde
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+docs/IMT600_Week1_Kickoff.md
