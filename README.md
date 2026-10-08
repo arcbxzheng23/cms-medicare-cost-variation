@@ -61,6 +61,7 @@ cms-medicare-cost-variation/
 │   ├── data_profiling_notes.md
 │   ├── data_quality_log.md
 │   ├── silver_cleaning_log.md
+│   ├── run_evidence/   HTML exports of the Databricks runs, with all outputs
 │   └── profile_output.json
 ├── data/raw/           Local copy of the source CSV (git-ignored)
 ├── dashboards/         Tableau workbook (Week 8)
