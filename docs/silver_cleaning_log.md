@@ -2,7 +2,7 @@
 
 **Deliverable:** Week 2 (LO1, LO4), cleaning log for `workspace.cms.silver_cms_inpatient`
 **Author:** Ben Cheng · **Drafted:** 2026-10-08 · **Notebook:** `notebooks/02_silver_transform.py`
-**Status:** Logic verified two ways before the Databricks run: (1) pandas recomputation of every expected value, and (2) a local Apache Spark 4.0.1 dry run of notebooks 01 and 02 against the real CSV, where all 32 checks passed and every summary in section 4 matched to the cent. Not testable locally: Unity Catalog volume, Delta-only statements (CHECK constraints, column comments, DESCRIBE HISTORY). Databricks results go in section 5.
+**Status:** Logic verified two ways before the Databricks run: (1) pandas recomputation of every expected value, and (2) a local Apache Spark 4.0.1 dry run of notebooks 01 and 02 against the real CSV, where all 32 checks passed and every summary in section 4 matched to the cent. Not testable locally: Unity Catalog volume, Delta-only statements (CHECK constraints, column comments, DESCRIBE HISTORY). Databricks results (all checks passed) are in section 5.
 
 ---
 
@@ -96,11 +96,17 @@ From the pandas check of the same logic. "Weighted" means totals divided by tota
 
 ## 5. Databricks run results
 
-*To be filled in after the notebook runs: paste the validation table (all PASS), the three summary query outputs, and the Delta version number from `DESCRIBE HISTORY`.*
+Run in Databricks Free Edition (serverless), workspace catalog `workspace.cms`, from the Git folder linked to this repo.
 
 | Item | Result |
 |---|---|
-| Run date | |
-| Validation checks | __ / 32 passed |
-| Silver Delta version | |
-| Differences from section 3 / 4 | |
+| Run date | 2026-10-08 (Bronze 14:19, Silver 14:28 local time) |
+| Bronze checks | All passed: 145,879 rows, 15 source columns, all STRING, 0 corrupt records |
+| Bronze profile cross-check | Per-column counts, code ranges, RUCA distribution, key checks and Maryland markup preview identical to `data_profiling_notes.md` |
+| Bronze Delta history | v0 CREATE OR REPLACE TABLE AS SELECT, v1 SET TBLPROPERTIES (table comment) |
+| Silver validation checks | **32 / 32 passed** |
+| Silver summaries (section 4) | National, RUCA and state tables identical to the expected values, to the cent |
+| Silver column comments and CHECK constraints | Applied without error |
+| Differences from sections 3 and 4 | None |
+
+Week 2 deliverable complete: Silver Delta table built, validated and documented.

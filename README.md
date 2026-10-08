@@ -122,8 +122,8 @@ Every transformation is listed in [`docs/silver_cleaning_log.md`](docs/silver_cl
 
 | Week | Focus | Status |
 |---|---|---|
-| 1 | Environment + Git; Bronze ingest; profile all columns | Drafted; awaiting Databricks run |
-| 2 | Silver: clean, type, markup ratio; data-quality log | Drafted; awaiting Databricks run |
+| 1 | Environment + Git; Bronze ingest; profile all columns | Done (2026-10-08) |
+| 2 | Silver: clean, type, markup ratio; data-quality log | Done (2026-10-08) |
 | 3 | Gold star schema; per-DRG medians and hospital deviation | |
 | 4 | Gold by state/region, hospital outliers, RUCA rural/urban | |
 | 5 | Python exploratory and statistical analysis | |
