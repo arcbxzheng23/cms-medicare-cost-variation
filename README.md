@@ -135,6 +135,17 @@ Every transformation is listed in [`docs/silver_cleaning_log.md`](docs/silver_cl
 | 10 | Finalize repo and documentation | |
 | 11 | Final walkthrough presentation | |
 
+## AI assistance
+
+This project uses Claude (Anthropic) as a coding and writing assistant. To be transparent about who did what:
+
+| Week | Claude | Me (Ben Cheng) |
+|---|---|---|
+| 1 to 2 | Drafted the profiling script, the Bronze and Silver notebooks, the README, and the profiling, data-quality and cleaning logs | Reviewed every file, set up GitHub and Databricks, ran and validated both pipelines (all checks passed), and own the methodology decisions recorded in the logs |
+| 3 onward | Specs, concept explanations, hints and code review | Writing the code and analysis myself |
+
+All results in this repo come from runs I performed in Databricks; `docs/run_evidence/` holds the exported notebooks with their outputs.
+
 ## Data quality and methodology
 
 See [`docs/data_quality_log.md`](docs/data_quality_log.md) for every known issue and how each layer handles it, and [`docs/data_profiling_notes.md`](docs/data_profiling_notes.md) for the column-by-column profile of the raw file.
