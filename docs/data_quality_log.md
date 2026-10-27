@@ -46,6 +46,7 @@ Severity: **High** = would produce wrong numbers if ignored · **Med** = would b
 | DQ-19 | Calendar-year data spans two DRG versions | Methodology: MEDPAR is calendar year since the April 2023 update. CY2024 covers the end of FY2024 (MS-DRG v41) and the start of FY2025 (v42, from Oct 1 2024) | Low | Report | Note as a limitation; check that no DRG code in the file changed meaning between v41 and v42 | Open |
 | DQ-20 | Documentation drift | Local data dictionary is the May 2023 (RY23) version: calls the ID `Rndrng_CCN` and describes it as "outpatient"; file uses `Rndrng_Prvdr_CCN` | Low | Docs | Download the current RY26 data dictionary and methodology from data.cms.gov and store them in `docs/` | Open |
 | DQ-21 | Population scope | Original Medicare FFS, IPPS short-term hospitals only; no Medicare Advantage, Medicaid, private, uninsured; no territories (51 = 50 states + DC) | High | Report | State scope in the README, the dashboard, and the report. Findings describe Medicare FFS prices only, not hospital prices overall | Open |
+| DQ-22 | DRG with no non-Maryland benchmark | DRG 950 (Aftercare without CC/MCC) is reported only by Maryland hospitals. `gold_drg_benchmark` (Maryland excluded) has 539 rows vs 540 in `gold_dim_drg`; found with a LEFT JOIN on `drg_cd` | Low | Gold | Keep DRG 950 rows in the fact table and `gold_dim_drg`. With no non-Maryland median, these rows get no deviation score. Note in the report | Found in Gold 2026-10-27; documented, no fix needed |
 
 ## Decisions made
 
