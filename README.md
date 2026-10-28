@@ -52,9 +52,10 @@ workspace.cms.gold_*                         Gold: star schema (fact + hospital/
 cms-medicare-cost-variation/
 ├── README.md
 ├── .gitignore
-├── notebooks/          Databricks notebooks (source format .py, importable via Repos)
+├── notebooks/          Databricks notebooks (01 and 02 as source .py, 03 as .ipynb; importable via Repos)
 │   ├── 01_bronze_ingest.py
-│   └── 02_silver_transform.py
+│   ├── 02_silver_transform.py
+│   └── 03_gold_star_schema.ipynb
 ├── scripts/            Local Python utilities
 │   └── profile_raw_csv.py
 ├── docs/               Project documentation
@@ -119,13 +120,37 @@ cms-medicare-cost-variation/
 
 Every transformation is listed in [`docs/silver_cleaning_log.md`](docs/silver_cleaning_log.md).
 
+## Gold layer
+
+**Purpose.** Reshape Silver into a star schema for analysis and Tableau, and add the per-DRG benchmarks, hospital deviation scores and data quality flags that need aggregation across rows.
+
+**Tables.** All Delta, built by `notebooks/03_gold_star_schema.ipynb` in Spark SQL.
+
+| Table | Grain | Rows | Contents |
+|---|---|---|---|
+| `gold_dim_hospital` | One row per hospital (CCN) | 2,906 | Name, street, city, state, ZIP, RUCA code and description, `urban_rural`, `is_maryland` |
+| `gold_dim_drg` | One row per DRG | 540 | `drg_cd`, `drg_desc` |
+| `gold_fact_inpatient` | Hospital x DRG | 145,879 | Discharges, average and total charges and payments, `markup_ratio` |
+| `gold_drg_benchmark` | One row per DRG, Maryland excluded | 539 | `n_hospitals`; median, Q1 and Q3 of `avg_total_payment`; `is_thin_drg` (fewer than 30 hospitals) |
+| `gold_hospital_drg_deviation` | Hospital x DRG | 145,878 | `payment_ratio` (payment / DRG median), quartiles, `is_thin_drg`, `is_payment_outlier` (above Q3 + 3 x IQR, non-thin DRGs only) |
+| `gold_hospital_drg_count` | One row per hospital | 2,906 | `n_drgs`, `is_low_drg_hospital` (fewer than 5 DRGs) |
+
+**Design choices.**
+- *Keys checked first.* Profiling cells confirm one row per hospital x DRG, one set of attributes per CCN, one description per DRG code, and no nulls in the hospital attributes.
+- *Benchmark = plain median of total payment, Maryland excluded.* Each hospital counts once, and Maryland's all-payer waiver would distort the typical price. Maryland hospitals are still scored against the non-Maryland median.
+- *Deviation as a ratio.* A `payment_ratio` of 1.25 means 25% above the DRG's typical payment, which is comparable across cheap and expensive DRGs.
+- *Flags, not deletions.* Thin DRGs (229 of 539), low-DRG hospitals (370 of 2,906) and payment outliers (2,358 rows) are flagged so later analysis can filter them.
+- *Sensitivity checks.* A thin-DRG cutoff of 10 leaves 149 thin DRGs, and 1.5 x IQR flags 7,572 outliers; the main rules were kept.
+
+DRG 950 is reported only by Maryland hospitals, so it has no benchmark and drops out of the deviation table (DQ-22). Every Gold decision is recorded in [`docs/data_quality_log.md`](docs/data_quality_log.md) (DQ-14, DQ-16, DQ-17, DQ-22).
+
 ## Weekly roadmap
 
 | Week | Focus | Status |
 |---|---|---|
 | 1 | Environment + Git; Bronze ingest; profile all columns | Done (2026-10-08) |
 | 2 | Silver: clean, type, markup ratio; data-quality log | Done (2026-10-08) |
-| 3 | Gold star schema; per-DRG medians and hospital deviation | |
+| 3 | Gold star schema; per-DRG medians and hospital deviation | Done (2026-10-27) |
 | 4 | Gold by state/region, hospital outliers, RUCA rural/urban | |
 | 5 | Python exploratory and statistical analysis | |
 | 6 | Core visuals | |
@@ -142,7 +167,7 @@ This project uses Claude (Anthropic) as a coding and writing assistant. To be tr
 | Week | Claude | Me (Ben Cheng) |
 |---|---|---|
 | 1 to 2 | Drafted the profiling script, the Bronze and Silver notebooks, the README, and the profiling, data-quality and cleaning logs | Reviewed every file, set up GitHub and Databricks, ran and validated both pipelines (all checks passed), and own the methodology decisions recorded in the logs |
-| 3 onward | Specs, concept explanations, hints and code review | Writing the code and analysis myself |
+| 3 onward | Specs, concept explanations, hints and code review. Also used as an automation tool to type up documentation (data-quality log entries, notebook comments, README updates) from my decisions and results | Writing the code and analysis myself, and making every methodology decision and producing every result that the documentation records |
 
 All results in this repo come from runs I performed in Databricks; `docs/run_evidence/` holds the exported notebooks with their outputs.
 
