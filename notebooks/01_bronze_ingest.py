@@ -1,4 +1,8 @@
 # Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "6"
+# ///
 # MAGIC %md
 # MAGIC # 01 · Bronze ingestion: CMS Medicare Inpatient (by Provider and Service, DY2024)
 # MAGIC
