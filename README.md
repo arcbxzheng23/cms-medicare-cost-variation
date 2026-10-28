@@ -61,6 +61,7 @@ cms-medicare-cost-variation/
 ├── docs/               Project documentation
 │   ├── data_profiling_notes.md
 │   ├── data_quality_log.md
+│   ├── gold_build_log.md
 │   ├── silver_cleaning_log.md
 │   ├── run_evidence/   HTML exports of the Databricks runs, with all outputs
 │   └── profile_output.json
@@ -142,7 +143,7 @@ Every transformation is listed in [`docs/silver_cleaning_log.md`](docs/silver_cl
 - *Flags, not deletions.* Thin DRGs (229 of 539), low-DRG hospitals (370 of 2,906) and payment outliers (2,358 rows) are flagged so later analysis can filter them.
 - *Sensitivity checks.* A thin-DRG cutoff of 10 leaves 149 thin DRGs, and 1.5 x IQR flags 7,572 outliers; the main rules were kept.
 
-DRG 950 is reported only by Maryland hospitals, so it has no benchmark and drops out of the deviation table (DQ-22). Every Gold decision is recorded in [`docs/data_quality_log.md`](docs/data_quality_log.md) (DQ-14, DQ-16, DQ-17, DQ-22).
+DRG 950 is reported only by Maryland hospitals, so it has no benchmark and drops out of the deviation table (DQ-22). Every Gold decision is recorded in [`docs/data_quality_log.md`](docs/data_quality_log.md) (DQ-14, DQ-16, DQ-17, DQ-22), and every build step and validation result is listed in [`docs/gold_build_log.md`](docs/gold_build_log.md).
 
 ## Weekly roadmap
 
