@@ -1,14 +1,30 @@
 # CMS Medicare Inpatient Cost Variation
 
-**How much does the same inpatient procedure cost across hospitals and regions, and where are the biggest outliers and savings opportunities?**
+**For which hospital procedures does cost vary most in ways that quality and ownership do not explain, and where should a health system and payer look for savings?**
 
-An end-to-end lakehouse analytics project on CMS Medicare inpatient data: a medallion (Bronze, Silver, Gold) pipeline in Databricks with Delta Lake and Spark SQL, descriptive and diagnostic analysis in Python, an interactive Tableau dashboard, and a written findings report.
+An end-to-end lakehouse analytics project on two joined CMS datasets (Medicare inpatient payments and hospital quality and ownership): a medallion (Bronze, Silver, Gold) pipeline in Databricks with Delta Lake and Spark SQL, descriptive and diagnostic analysis in Python, an interactive Tableau dashboard, and a written findings report.
 
 IMT 600 Independent Study, Autumn 2026 · Pin-Chu (Ben) Cheng · Faculty supervisor: Steven Gustafson
 
 ---
 
-## Data source
+## Research questions and hypotheses
+
+From the approved IMT 600 proposal. The data will refine these.
+
+1. For which hospital procedures does cost vary most in ways that quality and ownership do not explain?
+2. Where should a health system and payer look for savings?
+
+| ID | Hypothesis | Status |
+|---|---|---|
+| H1 | Cost varies more by hospital than by region or severity | Partly answered (Week 4): state payment index spans 0.84 to 1.45, hospital index 0.61 to 9.95. Formal test in Week 6 |
+| H2 | Higher-cost hospitals do not have higher quality ratings | Week 6, after the Hospital General Information join (Week 5) |
+| H3 | For-profit hospitals show higher charge-to-payment markups | Week 6, after the Hospital General Information join (Week 5) |
+| H4 | Rural and urban hospitals differ in cost for the same procedure | Answered (Week 4): urban paid 41% more per discharge raw, 11% more after case-mix adjustment. Significance test in Week 6 |
+
+## Data sources
+
+### 1. Medicare Inpatient Hospitals, by Provider and Service (cost data)
 
 | | |
 |---|---|
@@ -25,25 +41,39 @@ The raw file is **not committed** to this repo. To reproduce:
 2. Save it as `data/raw/MUP_INP_RY26_P03_V10_DY24_PrvSvc.CSV` for local profiling.
 3. Upload the same file to the Databricks volume described below.
 
+### 2. Hospital General Information (hospital attributes)
+
+| | |
+|---|---|
+| Dataset | CMS Provider Data Catalog, *Hospital General Information* (dataset `xubh-q36u`) |
+| Snapshot | File downloaded 2026-09-04 (2026 release); attributes are a 2026 snapshot against 2024 claims (DQ-24) |
+| File | `Hospital_General_Information.csv` |
+| Grain | One row = one hospital (`Facility ID` = CCN) |
+| Size | 5,419 rows x 38 columns |
+| Used for | Ownership, hospital type, emergency services, overall star rating (1 to 5 or Not Available) |
+| Join | `Facility ID` = `ccn`, both 6-character text. 2,867 of 2,906 inpatient hospitals match (DQ-25) |
+
+Download it from data.cms.gov/provider-data (search "Hospital General Information") and upload it to the same Databricks volume.
+
 ## Architecture
 
 ```
-CSV (data.cms.gov)
-   │  upload
-   ▼
-/Volumes/workspace/cms/raw/                  landing zone (Unity Catalog volume)
-   │  notebooks/01_bronze_ingest.py
-   ▼
-workspace.cms.bronze_cms_inpatient           Bronze: raw, all STRING, + lineage columns
-   │  (Week 2)
-   ▼
-workspace.cms.silver_cms_inpatient           Silver: typed, cleaned, markup ratio
-   │  (Weeks 3-4)
-   ▼
-workspace.cms.gold_*                         Gold: star schema (fact + hospital/DRG dims), variation tables
+Inpatient CSV (data.cms.gov)                 Hospital General Information CSV (Provider Data Catalog)
+   │  upload                                    │  upload
+   ▼                                            ▼
+/Volumes/workspace/cms/raw/                  landing zone (Unity Catalog volume, both files)
+   │  01_bronze_ingest.py                       │  05_hospital_info.ipynb
+   ▼                                            ▼
+bronze_cms_inpatient                         bronze_hospital_info           Bronze: raw, all STRING, + lineage
+   │  02_silver_transform.py                    │  05_hospital_info.ipynb
+   ▼                                            ▼
+silver_cms_inpatient                         silver_hospital_info           Silver: typed, cleaned
+   │  03 and 04 notebooks                       │  05_hospital_info.ipynb
+   ▼                                            ▼
+gold_* star schema and aggregates  ◄── ccn ──  gold_dim_hospital_profile    Gold: joined on CCN
    │
-   ├──► Python analysis (Weeks 5-7)
-   └──► Tableau dashboard (Week 8)
+   ├──► Python analysis: hypothesis tests and regression (06_python_analysis.ipynb, Week 6)
+   └──► Tableau dashboard (Weeks 7-8)
 ```
 
 ## Repository layout
@@ -56,7 +86,8 @@ cms-medicare-cost-variation/
 │   ├── 01_bronze_ingest.py
 │   ├── 02_silver_transform.py
 │   ├── 03_gold_star_schema.ipynb
-│   └── 04_gold_aggregates.ipynb
+│   ├── 04_gold_aggregates.ipynb
+│   └── 05_hospital_info.ipynb   (Week 5, in progress)
 ├── scripts/            Local Python utilities
 │   └── profile_raw_csv.py
 ├── docs/               Project documentation
@@ -67,7 +98,7 @@ cms-medicare-cost-variation/
 │   ├── run_evidence/   HTML exports of the Databricks runs, with all outputs
 │   └── profile_output.json
 ├── data/raw/           Local copy of the source CSV (git-ignored)
-├── dashboards/         Tableau workbook (Week 8)
+├── dashboards/         Tableau workbook (Weeks 7-8)
 └── reports/            Written findings report (Week 9)
 ```
 
@@ -168,13 +199,20 @@ Every table reconciles to the Silver totals to the cent. Key findings: state ind
 | 2 | Silver: clean, type, markup ratio; data-quality log | Done (2026-10-08) |
 | 3 | Gold star schema; per-DRG medians and hospital deviation | Done (2026-10-27) |
 | 4 | Gold by state/region, hospital outliers, RUCA rural/urban | Done (2026-11-02) |
-| 5 | Python exploratory and statistical analysis | |
-| 6 | Core visuals | |
-| 7 | Prioritization, savings estimate, draft recommendation | |
-| 8 | Tableau dashboard | |
-| 9 | Written findings report | |
-| 10 | Finalize repo and documentation | |
-| 11 | Final walkthrough presentation | |
+| 5 | Second dataset: Hospital General Information Bronze, Silver, and CCN join to Gold (completes LO1) | In progress (to Nov 6) |
+| 6 | Python: H1 to H4 hypothesis tests; regression of cost on quality, ownership and location; residual-ranked hospitals | Nov 4 to 10 |
+| 7 | Sense-check findings with data and healthcare contacts; Tableau prototype (v1) | Nov 11 to 17 |
+| 8 | Tableau dashboard v2 for a non-technical viewer | Nov 18 to 24 |
+| 9 | Short report draft with one recommendation | Nov 25 to Dec 1 |
+| 10 | Finalize dashboard, report, repo and README | Dec 2 to 8 |
+| 11 | Final walkthrough with supervisor | Dec 9 to 18 |
+
+### Changes from the proposal
+
+- **Second dataset integrated in Week 5** rather than Weeks 1 to 3. Weeks 1 to 4 built the full inpatient pipeline first; no result from those weeks depends on the second dataset, so nothing was rebuilt.
+- **Case-mix-adjusted payment index added** (Week 4). Raw payment per discharge mixes hospital prices with the mix of procedures each hospital treats, so comparisons use actual vs expected payment.
+- **Hypothesis tests moved from Week 4 to Week 6**, alongside the regression, because H2 and H3 need the second dataset.
+- **CCN normalization:** the proposal expected the inpatient file to have lost leading zeros. Reading every column as text in Bronze preserved them, and Silver enforces a 6-digit format (DQ-02), so the join needs no padding.
 
 ## AI assistance
 
@@ -186,6 +224,8 @@ This project uses Claude (Anthropic) as a coding and writing assistant. To be tr
 | 3 | Specs, concept explanations, hints and code review. Also used as an automation tool to type up documentation (data-quality log entries, notebook comments, README updates) from my decisions and results | Writing the code and analysis myself, and making every methodology decision and producing every result that the documentation records |
 | 4 (2026-10-27) | Proposed the Week 4 build plan: the five Gold tables, the case-mix-adjusted payment index, expected checks against Silver, and the design questions to settle. No code | Reviewed the plan and set the Week 4 scope |
 | 4 (2026-11-02) | Recommended answers to the design questions and supplied the Census region reference data. Provided example SQL for notebook cells 2 to 17 (`gold_dim_state`, `gold_state_summary`, `gold_region_summary` and their checks). From cell 18 on, hints, concept explanations and code review, plus a fill-in-the-blank skeleton for the RUCA summary (cell 27) and corrected lines when I was stuck (the outlier flag in cell 20, parts of cell 33). Wrote the cell comment headers and typed up documentation from my results | Chose and own every design decision; adapted, ran, debugged and verified every cell in Databricks, including fixing syntax errors and restructuring check cells; wrote cells 18 onward myself (hospital index with the multi-key join that avoids fan-out, outlier thresholds, RUCA checks, sensitivity check and payment variation query); caught a misread in review; interpreted all results and findings |
+
+| 5 (2026-11-02) | Compared the repo to the approved proposal and identified the missing second dataset; profiled the new file and previewed the join locally; drafted the revised roadmap and the five design questions; wrote notebook 05 cells 1 to 4 (decisions, config, file check, Bronze ingest, adapted from my Week 1 notebook), the README changes and the decision log entries at my request | Chose every design decision (snapshot, unrated hospitals, ownership groups, unmatched hospitals); uploaded the data; run and verify the notebook in Databricks; write cells 5 onward (checks, Silver, Gold join) |
 
 All results in this repo come from runs I performed in Databricks; `docs/run_evidence/` holds the exported notebooks with their outputs.
 
