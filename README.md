@@ -191,17 +191,27 @@ Built in `notebooks/04_gold_aggregates.ipynb` on top of the star schema. The hea
 
 Every table reconciles to the Silver totals to the cent. Key findings: state index ranges from 0.84 (AR) to 1.45 (NY); the 51 hospital outliers are almost all public safety-net systems; the urban payment premium falls from 41% raw to 11% after case-mix adjustment; and $8.6B (9.8% of non-Maryland payments) was paid above the state median for each DRG, much of it designed policy adjustment (DQ-23). Decisions, checks and findings are in Part 2 of [`docs/gold_build_log.md`](docs/gold_build_log.md).
 
-### Week 5: hospital attributes (second dataset)
+## Hospital attributes layer (second dataset, Week 5)
 
-Built in `notebooks/05_hospital_info.ipynb` from the CMS Hospital General Information snapshot of 2024-10-30.
+**Purpose.** Add each hospital's ownership, type and overall star rating, so cost can be tested against quality and ownership (H2, H3) and used in the Week 6 regression. The second dataset goes through its own Bronze, Silver and Gold steps and meets the inpatient pipeline on `ccn`.
+
+**Tables.** All Delta, built by `notebooks/05_hospital_info.ipynb` (Bronze in PySpark, Silver and Gold in Spark SQL).
 
 | Table | Grain | Rows | Contents |
 |---|---|---|---|
-| `bronze_hospital_info` | One row per hospital in the CMS file | 5,394 | All 39 source columns as STRING with their original names (Delta column mapping), plus `_ingest_ts`, `_source_file` |
-| `silver_hospital_info` | One row per hospital | 5,394 | `ccn`, name, state, `hospital_type`, original `hospital_ownership`, `ownership_group` (For-profit, Non-profit, Government, Federal (VA/DoD)), `has_emergency_services`, `star_rating` (INT, NULL when not available), `rating_category` ('1' to '5' or 'Unrated') |
+| `bronze_hospital_info` | One row per hospital in the CMS file | 5,394 | All 39 source columns as STRING with their original names, plus `_corrupt_record`, `_ingest_ts`, `_source_file` |
+| `silver_hospital_info` | One row per hospital | 5,394 | `ccn`, `facility_name`, `state_abbr`, `hospital_type`, `hospital_ownership` (original), `ownership_group`, `has_emergency_services`, `star_rating` (INT), `rating_category` |
 | `gold_dim_hospital_profile` | One row per inpatient hospital | 2,906 | The Silver attributes joined on `ccn`, plus `is_profile_matched`. Joins to `gold_dim_hospital` and `gold_hospital_index` on `ccn` |
 
-2,899 of 2,906 inpatient hospitals match, all of them Acute Care Hospitals. Among them: 1,875 non-profit, 631 for-profit, 393 government; star ratings 1 to 5 for 2,517 and Unrated for 382. The 7 unmatched hospitals keep NULL attributes (DQ-25).
+**Design choices.**
+- *Snapshot inside the claims year.* The CMS archived snapshot of 2024-10-30 is used instead of the current release, so CCNs and ratings describe hospitals as they were in 2024. It matches 2,899 of 2,906 inpatient hospitals, against 2,867 for the 2026 file (DQ-24).
+- *Original column names kept in Bronze.* CMS names contain spaces and `/`, so the table uses Delta column mapping; Silver renames them to snake_case.
+- *Ownership in four groups.* For-profit (Proprietary, Physician), Non-profit (three Voluntary non-profit values), Government (Local, Hospital District or Authority, State, Federal, Tribal) and Federal (VA/DoD), which has no inpatient claims. The original value stays in Silver.
+- *Unrated is a category, not a gap.* "Not Available" ratings become `rating_category = 'Unrated'` with `star_rating` NULL, so no hospital is dropped from comparisons.
+- *Unmatched hospitals kept.* The 7 inpatient hospitals with no match keep NULL attributes (NULL, not Unrated) and `is_profile_matched = false` (DQ-25).
+- *Separate profile table.* `gold_dim_hospital` from notebook 03 is not modified, so every notebook can be rerun on its own.
+
+**Result.** Every matched hospital is an Acute Care Hospital. Ownership: 1,875 non-profit, 631 for-profit, 393 government. Star ratings: 2,517 rated 1 to 5 (1: 250, 2: 529, 3: 750, 4: 677, 5: 311) and 382 Unrated. Profiling of the file is in section 10 of [`docs/data_profiling_notes.md`](docs/data_profiling_notes.md), and the decisions are in [`docs/data_quality_log.md`](docs/data_quality_log.md) (DQ-24, DQ-25).
 
 ## Weekly roadmap
 
@@ -212,12 +222,12 @@ Built in `notebooks/05_hospital_info.ipynb` from the CMS Hospital General Inform
 | 3 | Gold star schema; per-DRG medians and hospital deviation | Done (2026-10-27) |
 | 4 | Gold by state/region, hospital outliers, RUCA rural/urban | Done (2026-11-02) |
 | 5 | Second dataset: Hospital General Information Bronze, Silver, and CCN join to Gold (completes LO1) | Done (2026-11-03) |
-| 6 | Python: H1 to H4 hypothesis tests; regression of cost on quality, ownership and location; residual-ranked hospitals | Nov 4 to 10 |
-| 7 | Sense-check findings with data and healthcare contacts; Tableau prototype (v1) | Nov 11 to 17 |
-| 8 | Tableau dashboard v2 for a non-technical viewer | Nov 18 to 24 |
-| 9 | Short report draft with one recommendation | Nov 25 to Dec 1 |
-| 10 | Finalize dashboard, report, repo and README | Dec 2 to 8 |
-| 11 | Final walkthrough with supervisor | Dec 9 to 18 |
+| 6 | Python: H1 to H4 hypothesis tests; regression of cost on quality, ownership and location; residual-ranked hospitals | Planned (Nov 4 to 10) |
+| 7 | Sense-check findings with data and healthcare contacts; Tableau prototype (v1) | Planned (Nov 11 to 17) |
+| 8 | Tableau dashboard v2 for a non-technical viewer | Planned (Nov 18 to 24) |
+| 9 | Short report draft with one recommendation | Planned (Nov 25 to Dec 1) |
+| 10 | Finalize dashboard, report, repo and README | Planned (Dec 2 to 8) |
+| 11 | Final walkthrough with supervisor | Planned (Dec 9 to 18) |
 
 ### Changes from the proposal
 
