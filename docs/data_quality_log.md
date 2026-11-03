@@ -69,7 +69,7 @@ Severity: **High** = would produce wrong numbers if ignored · **Med** = would b
 
 ## Closed issues
 
-Issues move here once they are fixed and verified, with nothing left for later layers or the report. Closed 2026-10-27 (DQ-01 to DQ-18) and 2026-11-02 (DQ-15); the Status column says how each was resolved.
+Issues move here once they are fixed and verified, with nothing left for later layers or the report. Closed 2026-10-27 (DQ-01, 02, 08, 09, 11, 12, 18) and 2026-11-02 (DQ-15); the Status column says how each was resolved.
 
 | ID | Issue | Evidence | Sev. | Layer | Planned handling | Status |
 |---|---|---|---|---|---|---|
