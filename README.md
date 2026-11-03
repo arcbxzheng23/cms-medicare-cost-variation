@@ -55,7 +55,8 @@ cms-medicare-cost-variation/
 ├── notebooks/          Databricks notebooks (01 and 02 as source .py, 03 as .ipynb; importable via Repos)
 │   ├── 01_bronze_ingest.py
 │   ├── 02_silver_transform.py
-│   └── 03_gold_star_schema.ipynb
+│   ├── 03_gold_star_schema.ipynb
+│   └── 04_gold_aggregates.ipynb   (Week 4, added when complete)
 ├── scripts/            Local Python utilities
 │   └── profile_raw_csv.py
 ├── docs/               Project documentation
@@ -145,6 +146,19 @@ Every transformation is listed in [`docs/silver_cleaning_log.md`](docs/silver_cl
 
 DRG 950 is reported only by Maryland hospitals, so it has no benchmark and drops out of the deviation table (DQ-22). Every Gold decision is recorded in [`docs/data_quality_log.md`](docs/data_quality_log.md) (DQ-14, DQ-16, DQ-17, DQ-22), and every build step and validation result is listed in [`docs/gold_build_log.md`](docs/gold_build_log.md).
 
+### Week 4 aggregates (in progress)
+
+Built in `04_gold_aggregates` on top of the star schema. The headline measure is a **case-mix-adjusted payment index**: actual total payment divided by expected payment, where expected = discharges x the DRG's national median payment. An index of 1.00 means paid the national median for that exact mix of DRGs.
+
+| Table | Grain | Rows | Contents |
+|---|---|---|---|
+| `gold_dim_state` | One row per state (50 + DC) | 51 | Census region and division |
+| `gold_state_summary` | One row per state | 51 | Volume, payment per discharge, weighted markup, expected payment, `payment_index` (NULL for Maryland), `is_small_state` |
+| `gold_region_summary` | Division, region and national rows (`geo_level`) | 14 | Same measures via `GROUP BY ROLLUP`; Maryland excluded from the index only |
+| `gold_hospital_index` | One row per non-Maryland hospital | 2,862 | In progress: index, DRG count, Week 3 outlier-cell count and share, low-DRG and hospital-outlier flags |
+
+All three finished tables reconcile to the Silver totals to the cent (total payment 90,927,479,550.00; national markup 5.03). Decisions, checks and findings are in Part 2 of [`docs/gold_build_log.md`](docs/gold_build_log.md).
+
 ## Weekly roadmap
 
 | Week | Focus | Status |
@@ -152,7 +166,7 @@ DRG 950 is reported only by Maryland hospitals, so it has no benchmark and drops
 | 1 | Environment + Git; Bronze ingest; profile all columns | Done (2026-10-08) |
 | 2 | Silver: clean, type, markup ratio; data-quality log | Done (2026-10-08) |
 | 3 | Gold star schema; per-DRG medians and hospital deviation | Done (2026-10-27) |
-| 4 | Gold by state/region, hospital outliers, RUCA rural/urban | |
+| 4 | Gold by state/region, hospital outliers, RUCA rural/urban | In progress (state, region done) |
 | 5 | Python exploratory and statistical analysis | |
 | 6 | Core visuals | |
 | 7 | Prioritization, savings estimate, draft recommendation | |
@@ -168,7 +182,8 @@ This project uses Claude (Anthropic) as a coding and writing assistant. To be tr
 | Week | Claude | Me (Ben Cheng) |
 |---|---|---|
 | 1 to 2 | Drafted the profiling script, the Bronze and Silver notebooks, the README, and the profiling, data-quality and cleaning logs | Reviewed every file, set up GitHub and Databricks, ran and validated both pipelines (all checks passed), and own the methodology decisions recorded in the logs |
-| 3 onward | Specs, concept explanations, hints and code review. Also used as an automation tool to type up documentation (data-quality log entries, notebook comments, README updates) from my decisions and results | Writing the code and analysis myself, and making every methodology decision and producing every result that the documentation records |
+| 3 | Specs, concept explanations, hints and code review. Also used as an automation tool to type up documentation (data-quality log entries, notebook comments, README updates) from my decisions and results | Writing the code and analysis myself, and making every methodology decision and producing every result that the documentation records |
+| 4 | Recommended the Week 4 design decisions (which I reviewed and adopted), supplied the Census region reference data, and drafted the SQL for `gold_dim_state`, `gold_state_summary`, `gold_region_summary` and their check queries for me to run. For `gold_hospital_index`, gave specs, hints and code review only. Typed up the documentation from my results | Chose and own the decisions, ran every cell and check in Databricks, debugged errors, wrote the `gold_hospital_index` queries myself, and interpreted the results |
 
 All results in this repo come from runs I performed in Databricks; `docs/run_evidence/` holds the exported notebooks with their outputs.
 
