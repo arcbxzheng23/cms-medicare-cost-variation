@@ -61,19 +61,20 @@ Download `hospitals_2024-10-30.zip` from the CMS Provider Data Catalog hospitals
 Inpatient CSV (data.cms.gov)                 Hospital General Information CSV (Provider Data Catalog)
    │  upload                                    │  upload
    ▼                                            ▼
-/Volumes/workspace/cms/raw/                  landing zone (Unity Catalog volume, both files)
+/Volumes/workspace/cms/raw/                  landing zone (Unity Catalog volume, both files; 2024-10-30 snapshot)
    │  01_bronze_ingest.py                       │  05_hospital_info.ipynb
    ▼                                            ▼
 bronze_cms_inpatient                         bronze_hospital_info           Bronze: raw, all STRING, + lineage
    │  02_silver_transform.py                    │  05_hospital_info.ipynb
    ▼                                            ▼
 silver_cms_inpatient                         silver_hospital_info           Silver: typed, cleaned
-   │  03 and 04 notebooks                       │  05_hospital_info.ipynb
+   │  03_gold_star_schema, 04_gold_aggregates   │  05_hospital_info.ipynb
    ▼                                            ▼
 gold_* star schema and aggregates  ◄── ccn ──  gold_dim_hospital_profile    Gold: joined on CCN
    │
    ├──► Python analysis: hypothesis tests and regression (06_python_analysis.ipynb, Week 6)
-   └──► Tableau dashboard (Weeks 7-8)
+   ├──► Tableau dashboard (Weeks 7-8)
+   └──► Written findings report with one recommendation (Week 9)
 ```
 
 ## Repository layout
@@ -82,12 +83,13 @@ gold_* star schema and aggregates  ◄── ccn ──  gold_dim_hospital_profi
 cms-medicare-cost-variation/
 ├── README.md
 ├── .gitignore
-├── notebooks/          Databricks notebooks (01 and 02 as source .py, 03 as .ipynb; importable via Repos)
+├── notebooks/          Databricks notebooks (01 and 02 as source .py, 03 onward as .ipynb; 04 and 05 saved with outputs; importable via Repos)
 │   ├── 01_bronze_ingest.py
 │   ├── 02_silver_transform.py
 │   ├── 03_gold_star_schema.ipynb
 │   ├── 04_gold_aggregates.ipynb
-│   └── 05_hospital_info.ipynb
+│   ├── 05_hospital_info.ipynb       Second dataset: Bronze, Silver, Gold join (Week 5)
+│   └── 06_python_analysis.ipynb     Hypothesis tests and regression (Week 6, planned)
 ├── scripts/            Local Python utilities
 │   └── profile_raw_csv.py
 ├── docs/               Project documentation
@@ -95,9 +97,9 @@ cms-medicare-cost-variation/
 │   ├── data_quality_log.md
 │   ├── gold_build_log.md
 │   ├── silver_cleaning_log.md
-│   ├── run_evidence/   HTML exports of the Databricks runs, with all outputs
+│   ├── run_evidence/   HTML exports of each Databricks notebook run, with all outputs (01 to 05)
 │   └── profile_output.json
-├── data/raw/           Local copy of the source CSV (git-ignored)
+├── data/raw/           Local copies of both source CSVs (git-ignored)
 ├── dashboards/         Tableau workbook (Weeks 7-8)
 └── reports/            Written findings report (Week 9)
 ```
