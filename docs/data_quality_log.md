@@ -1,8 +1,8 @@
 # Data-Quality Log
 
-Running log of data-quality issues and methodology decisions for the CMS Medicare inpatient pipeline (LO4). Each issue is found in profiling (Week 1), handled in the layer named, and closed with a note on what was done.
+Running log of data-quality issues and methodology decisions for the CMS Medicare pipeline, both datasets (LO4). Each issue is found in profiling (Week 1), handled in the layer named, and closed with a note on what was done.
 
-**Source:** `MUP_INP_RY26_P03_V10_DY24_PrvSvc.CSV` · **Evidence:** [`data_profiling_notes.md`](data_profiling_notes.md) · **Opened:** 2026-10-05 (Week 1)
+**Sources:** `MUP_INP_RY26_P03_V10_DY24_PrvSvc.CSV` (inpatient claims, from Week 1) and `Hospital_General_Information_2024-10-30.csv` (hospital attributes, from Week 5; DQ-24 onward) · **Evidence:** [`data_profiling_notes.md`](data_profiling_notes.md) (section 10 for the second file) · **Opened:** 2026-10-05 (Week 1)
 
 Severity: **High** = would produce wrong numbers if ignored · **Med** = would bias or confuse results · **Low** = cosmetic or documentation.
 
