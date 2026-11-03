@@ -18,8 +18,8 @@ From the approved IMT 600 proposal. The data will refine these.
 | ID | Hypothesis | Status |
 |---|---|---|
 | H1 | Cost varies more by hospital than by region or severity | Partly answered (Week 4): state payment index spans 0.84 to 1.45, hospital index 0.61 to 9.95. Formal test in Week 6 |
-| H2 | Higher-cost hospitals do not have higher quality ratings | Week 6, after the Hospital General Information join (Week 5) |
-| H3 | For-profit hospitals show higher charge-to-payment markups | Week 6, after the Hospital General Information join (Week 5) |
+| H2 | Higher-cost hospitals do not have higher quality ratings | Week 6. Data ready: 2,517 inpatient hospitals with a 1 to 5 star rating |
+| H3 | For-profit hospitals show higher charge-to-payment markups | Week 6. Data ready: 1,875 non-profit, 631 for-profit, 393 government inpatient hospitals |
 | H4 | Rural and urban hospitals differ in cost for the same procedure | Answered (Week 4): urban paid 41% more per discharge raw, 11% more after case-mix adjustment. Significance test in Week 6 |
 
 ## Data sources
@@ -46,14 +46,14 @@ The raw file is **not committed** to this repo. To reproduce:
 | | |
 |---|---|
 | Dataset | CMS Provider Data Catalog, *Hospital General Information* (dataset `xubh-q36u`) |
-| Snapshot | File downloaded 2026-09-04 (2026 release); attributes are a 2026 snapshot against 2024 claims (DQ-24) |
-| File | `Hospital_General_Information.csv` |
+| Snapshot | CMS archived snapshot of 2024-10-30, inside the claims year (DQ-24) |
+| File | `Hospital_General_Information_2024-10-30.csv` (renamed from `Hospital_General_Information.csv` inside the archive) |
 | Grain | One row = one hospital (`Facility ID` = CCN) |
-| Size | 5,419 rows x 38 columns |
+| Size | 5,394 rows x 39 columns |
 | Used for | Ownership, hospital type, emergency services, overall star rating (1 to 5 or Not Available) |
-| Join | `Facility ID` = `ccn`, both 6-character text. 2,867 of 2,906 inpatient hospitals match (DQ-25) |
+| Join | `Facility ID` = `ccn`, both 6-character text. 2,899 of 2,906 inpatient hospitals match (DQ-25) |
 
-Download it from data.cms.gov/provider-data (search "Hospital General Information") and upload it to the same Databricks volume.
+Download `hospitals_2024-10-30.zip` from the CMS Provider Data Catalog hospitals archive (data.cms.gov/provider-data/archived-data/hospitals), extract `Hospital_General_Information.csv`, rename it as above, and upload it to the same Databricks volume.
 
 ## Architecture
 
@@ -87,7 +87,7 @@ cms-medicare-cost-variation/
 │   ├── 02_silver_transform.py
 │   ├── 03_gold_star_schema.ipynb
 │   ├── 04_gold_aggregates.ipynb
-│   └── 05_hospital_info.ipynb   (Week 5, in progress)
+│   └── 05_hospital_info.ipynb
 ├── scripts/            Local Python utilities
 │   └── profile_raw_csv.py
 ├── docs/               Project documentation
@@ -191,6 +191,18 @@ Built in `notebooks/04_gold_aggregates.ipynb` on top of the star schema. The hea
 
 Every table reconciles to the Silver totals to the cent. Key findings: state index ranges from 0.84 (AR) to 1.45 (NY); the 51 hospital outliers are almost all public safety-net systems; the urban payment premium falls from 41% raw to 11% after case-mix adjustment; and $8.6B (9.8% of non-Maryland payments) was paid above the state median for each DRG, much of it designed policy adjustment (DQ-23). Decisions, checks and findings are in Part 2 of [`docs/gold_build_log.md`](docs/gold_build_log.md).
 
+### Week 5: hospital attributes (second dataset)
+
+Built in `notebooks/05_hospital_info.ipynb` from the CMS Hospital General Information snapshot of 2024-10-30.
+
+| Table | Grain | Rows | Contents |
+|---|---|---|---|
+| `bronze_hospital_info` | One row per hospital in the CMS file | 5,394 | All 39 source columns as STRING with their original names (Delta column mapping), plus `_ingest_ts`, `_source_file` |
+| `silver_hospital_info` | One row per hospital | 5,394 | `ccn`, name, state, `hospital_type`, original `hospital_ownership`, `ownership_group` (For-profit, Non-profit, Government, Federal (VA/DoD)), `has_emergency_services`, `star_rating` (INT, NULL when not available), `rating_category` ('1' to '5' or 'Unrated') |
+| `gold_dim_hospital_profile` | One row per inpatient hospital | 2,906 | The Silver attributes joined on `ccn`, plus `is_profile_matched`. Joins to `gold_dim_hospital` and `gold_hospital_index` on `ccn` |
+
+2,899 of 2,906 inpatient hospitals match, all of them Acute Care Hospitals. Among them: 1,875 non-profit, 631 for-profit, 393 government; star ratings 1 to 5 for 2,517 and Unrated for 382. The 7 unmatched hospitals keep NULL attributes (DQ-25).
+
 ## Weekly roadmap
 
 | Week | Focus | Status |
@@ -199,7 +211,7 @@ Every table reconciles to the Silver totals to the cent. Key findings: state ind
 | 2 | Silver: clean, type, markup ratio; data-quality log | Done (2026-10-08) |
 | 3 | Gold star schema; per-DRG medians and hospital deviation | Done (2026-10-27) |
 | 4 | Gold by state/region, hospital outliers, RUCA rural/urban | Done (2026-11-02) |
-| 5 | Second dataset: Hospital General Information Bronze, Silver, and CCN join to Gold (completes LO1) | In progress (to Nov 6) |
+| 5 | Second dataset: Hospital General Information Bronze, Silver, and CCN join to Gold (completes LO1) | Done (2026-11-03) |
 | 6 | Python: H1 to H4 hypothesis tests; regression of cost on quality, ownership and location; residual-ranked hospitals | Nov 4 to 10 |
 | 7 | Sense-check findings with data and healthcare contacts; Tableau prototype (v1) | Nov 11 to 17 |
 | 8 | Tableau dashboard v2 for a non-technical viewer | Nov 18 to 24 |
@@ -225,7 +237,8 @@ This project uses Claude (Anthropic) as a coding and writing assistant. To be tr
 | 4 (2026-10-27) | Proposed the Week 4 build plan: the five Gold tables, the case-mix-adjusted payment index, expected checks against Silver, and the design questions to settle. No code | Reviewed the plan and set the Week 4 scope |
 | 4 (2026-11-02) | Recommended answers to the design questions and supplied the Census region reference data. Provided example SQL for notebook cells 2 to 17 (`gold_dim_state`, `gold_state_summary`, `gold_region_summary` and their checks). From cell 18 on, hints, concept explanations and code review, plus a fill-in-the-blank skeleton for the RUCA summary (cell 27) and corrected lines when I was stuck (the outlier flag in cell 20, parts of cell 33). Wrote the cell comment headers and typed up documentation from my results | Chose and own every design decision; adapted, ran, debugged and verified every cell in Databricks, including fixing syntax errors and restructuring check cells; wrote cells 18 onward myself (hospital index with the multi-key join that avoids fan-out, outlier thresholds, RUCA checks, sensitivity check and payment variation query); caught a misread in review; interpreted all results and findings |
 
-| 5 (2026-11-02) | Compared the repo to the approved proposal and identified the missing second dataset; profiled the new file and previewed the join locally; drafted the revised roadmap and the five design questions; wrote notebook 05 cells 1 to 4 (decisions, config, file check, Bronze ingest, adapted from my Week 1 notebook), the README changes and the decision log entries at my request | Chose every design decision (snapshot, unrated hospitals, ownership groups, unmatched hospitals); uploaded the data; run and verify the notebook in Databricks; write cells 5 onward (checks, Silver, Gold join) |
+| 5 (2026-11-02) | Compared the repo to the approved proposal and identified the missing second dataset; profiled the new file and previewed the join locally; drafted the revised roadmap and the five design questions; wrote notebook 05 cells 1 to 4 (decisions, config, file check, Bronze ingest, adapted from my Week 1 notebook), the README changes and the decision log entries at my request | Chose every design decision (snapshot, unrated hospitals, ownership groups, unmatched hospitals) and uploaded the data |
+| 5 (2026-11-03) | Found and downloaded the CMS archived 2024-10-30 snapshot at my request and previewed its join; fixed Cell 4's write for column names with spaces (Delta column mapping); updated cell headers and expected values for the 2024 file at my request; gave cell-by-cell comment outlines, hints and code review, plus corrected lines when I was stuck (the Non-profit LIKE pattern in cell 8, the CASE in cell 11a); typed up this documentation from my results | Chose to switch to the 2024 snapshot and to keep the 7 unmatched hospitals; wrote cells 5 to 11c myself (Bronze checks, category profiles, join preview and unmatched list, Silver table with ownership and rating mapping, Gold hospital profile and all checks); ran and verified every cell in Databricks |
 
 All results in this repo come from runs I performed in Databricks; `docs/run_evidence/` holds the exported notebooks with their outputs.
 
