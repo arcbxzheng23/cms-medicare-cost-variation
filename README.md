@@ -166,8 +166,7 @@ All three finished tables reconcile to the Silver totals to the cent (total paym
 | 1 | Environment + Git; Bronze ingest; profile all columns | Done (2026-10-08) |
 | 2 | Silver: clean, type, markup ratio; data-quality log | Done (2026-10-08) |
 | 3 | Gold star schema; per-DRG medians and hospital deviation | Done (2026-10-27) |
-| 4 (2026-10-27) | Proposed the Week 4 build plan: the five Gold tables, the case-mix-adjusted payment index, expected checks against Silver, and the design questions to settle. No code | Reviewed the plan and set the Week 4 scope |
-| 4 (2026-11-02) | Recommended answers to the design questions and supplied the Census region reference data. Provided example SQL for notebook cells 2 to 17 (`gold_dim_state`, `gold_state_summary`, `gold_region_summary` and their checks). From cell 18 on (`gold_hospital_index`), hints, concept explanations and code review only. Typed up documentation from my results | Chose and own every design decision; adapted, ran, debugged and verified every cell in Databricks, including fixing syntax errors and restructuring check cells; wrote cells 18 onward myself (hospital index, including the multi-key join that avoids fan-out); caught a misread in review; interpreted all results and findings |
+| 4 | Gold by state/region, hospital outliers, RUCA rural/urban | In progress (state, region done) |
 | 5 | Python exploratory and statistical analysis | |
 | 6 | Core visuals | |
 | 7 | Prioritization, savings estimate, draft recommendation | |
@@ -184,7 +183,8 @@ This project uses Claude (Anthropic) as a coding and writing assistant. To be tr
 |---|---|---|
 | 1 to 2 | Drafted the profiling script, the Bronze and Silver notebooks, the README, and the profiling, data-quality and cleaning logs | Reviewed every file, set up GitHub and Databricks, ran and validated both pipelines (all checks passed), and own the methodology decisions recorded in the logs |
 | 3 | Specs, concept explanations, hints and code review. Also used as an automation tool to type up documentation (data-quality log entries, notebook comments, README updates) from my decisions and results | Writing the code and analysis myself, and making every methodology decision and producing every result that the documentation records |
-| 4 | Recommended the Week 4 design decisions (which I reviewed and adopted), supplied the Census region reference data, and drafted the SQL for `gold_dim_state`, `gold_state_summary`, `gold_region_summary` and their check queries for me to run. For `gold_hospital_index`, gave specs, hints and code review only. Typed up the documentation from my results | Chose and own the decisions, ran every cell and check in Databricks, debugged errors, wrote the `gold_hospital_index` queries myself, and interpreted the results |
+| 4 (2026-10-27) | Proposed the Week 4 build plan: the five Gold tables, the case-mix-adjusted payment index, expected checks against Silver, and the design questions to settle. No code | Reviewed the plan and set the Week 4 scope |
+| 4 (2026-11-02) | Recommended answers to the design questions and supplied the Census region reference data. Provided example SQL for notebook cells 2 to 17 (`gold_dim_state`, `gold_state_summary`, `gold_region_summary` and their checks). From cell 18 on (`gold_hospital_index`), hints, concept explanations and code review only. Typed up documentation from my results | Chose and own every design decision; adapted, ran, debugged and verified every cell in Databricks, including fixing syntax errors and restructuring check cells; wrote cells 18 onward myself (hospital index, including the multi-key join that avoids fan-out); caught a misread in review; interpreted all results and findings |
 
 All results in this repo come from runs I performed in Databricks; `docs/run_evidence/` holds the exported notebooks with their outputs.
 
