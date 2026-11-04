@@ -235,7 +235,9 @@ Every table reconciles to the Silver totals to the cent. Key findings: state ind
 
 - **Second dataset integrated in Week 5** rather than Weeks 1 to 3. Weeks 1 to 4 built the full inpatient pipeline first; no result from those weeks depends on the second dataset, so nothing was rebuilt.
 - **Case-mix-adjusted payment index added** (Week 4). Raw payment per discharge mixes hospital prices with the mix of procedures each hospital treats, so comparisons use actual vs expected payment.
-- **Hypothesis tests moved from Week 4 to Week 6**, alongside the regression, because H2 and H3 need the second dataset.
+- **Python analysis moved from Weeks 4 and 5 to Week 6.** The hypothesis tests (proposal Week 4) and the regression with residual ranking (proposal Week 5) both need ownership and star ratings, which were only joined in Week 5. Both now run in Week 6, about two weeks later than planned.
+- **Sense-check conversations moved from Week 6 to Week 7**, so they can discuss regression results rather than early numbers. Tableau v1 stays in Week 7, and Weeks 8 to 11 are unchanged.
+- **Overall:** the deliverables and learning outcomes are the same as proposed; the delay is absorbed by combining the two Python weeks into Week 6 and running the conversations alongside the Tableau prototype.
 - **CCN normalization:** the proposal expected the inpatient file to have lost leading zeros. Reading every column as text in Bronze preserved them, and Silver enforces a 6-digit format (DQ-02), so the join needs no padding.
 
 ## AI assistance
