@@ -171,13 +171,16 @@ The relationship checks in section 5 and the RUCA and markup breakdowns are also
 
 **Source:** CMS Provider Data Catalog, *Hospital General Information* (dataset `xubh-q36u`), archived snapshot of 2024-10-30 (`hospitals_2024-10-30.zip`), file renamed `Hospital_General_Information_2024-10-30.csv`. Profiled in Databricks in `notebooks/05_hospital_info.ipynb` (cells 5 to 7b) and cross-checked locally in Python with identical counts.
 
+The first five rows count the **whole file** (all 5,394 hospitals, every type). The last two rows count only the **2,906 inpatient hospitals** in the payment data.
+
 | Fact | Value |
 |---|---|
 | Rows / columns | 5,394 / 39 |
 | Key | `Facility ID`: 5,394 distinct, 0 NULL, all 6 characters (leading zeros intact) |
 | Hospital Type | Acute Care Hospitals 3,153 · Critical Access 1,370 · Psychiatric 615 · Acute Care - Veterans Administration 132 · Childrens 92 · Acute Care - Department of Defense 32 |
 | Hospital Ownership | 12 values: Voluntary non-profit - Private 2,277 · Proprietary 1,050 · Government - Hospital District or Authority 514 · Government - Local 401 · Voluntary non-profit - Other 369 · Voluntary non-profit - Church 280 · Government - State 206 · Veterans Health Administration 132 · Physician 76 · Government - Federal 42 · Department of Defense 32 · Tribal 15 |
-| Hospital overall rating | 1: 276 · 2: 588 · 3: 822 · 4: 759 · 5: 381 · Not Available 2,568 |
+| Hospital overall rating (whole file) | 1: 276 · 2: 588 · 3: 822 · 4: 759 · 5: 381 · Not Available 2,568 (sums to 5,394) |
 | Join to inpatient hospitals | 2,899 of 2,906 match on CCN with no padding needed (DQ-02); all matches are Acute Care Hospitals; 7 unmatched (DQ-25) |
+| Rating among the 2,906 inpatient hospitals | 1: 250 · 2: 529 · 3: 750 · 4: 677 · 5: 311 (2,517 rated) · Unrated 382 · unmatched 7 (sums to 2,906; notebook 05, Cell 11c) |
 
 **Why the 2024 snapshot.** The 2026 release (downloaded 2026-09-04, 5,419 rows x 38 columns) matched only 2,867 inpatient hospitals. Of its 39 unmatched, 17 still existed under a new CCN after converting to Critical Access (15), Rural Emergency (1) or psychiatric (1) status. The snapshot inside the claims year avoids that drift (DQ-24).
