@@ -84,7 +84,7 @@ Week 3 deliverable complete: Gold star schema, benchmarks, deviation scores and 
 |---|---|---|
 | W4-1 | Headline measure = **payment index** = Σ actual total payment / Σ (discharges x DRG median payment) | Adjusts for case mix: 1.00 = paid the national DRG median for that exact mix of DRGs. Raw payment per discharge and weighted markup kept as descriptive columns |
 | W4-2 | Expected payment uses all 539 DRG benchmarks; non-thin only (310) run as a sensitivity check | Dropping thin DRGs would measure some hospitals on part of their volume. Confirmed in cell 32: no state index moves by more than 0.006 |
-| W4-3 | Hospital outlier = payment index above Q3 + 3 x IQR across hospitals with at least 5 DRGs; low-DRG hospitals never flagged | Same rule as DQ-14 and same exclusion as DQ-17. Upper fence only: the index has a floor near 0.6 but a long right tail (max 9.95) |
+| W4-3 | Hospital outlier = payment index above Q3 + 3 x IQR across hospitals with at least 5 DRGs; low-DRG hospitals never flagged | Same rule as DQ-14 and same exclusion as DQ-17. Upper threshold only: the index has a floor near 0.6 but a long right tail (max 9.95) |
 | W4-4 | RUCA: binary `urban_rural` is the headline; the five RUCA groups kept in the table; Unknown (99) its own group | Small town (196 hospitals) and Rural (38) are too thin for headline findings (DQ-12) |
 | W4-5 | `gold_dim_state` carries Census region (4) and division (9); regions used for reporting | One extra column avoids a rebuild if Week 5 needs divisions |
 | W4-6 | Maryland kept in state and region summaries for volume and markup; its payment index is NULL or excluded. Hospital index and RUCA summary exclude Maryland entirely | No IPPS benchmark (DQ-13) |
@@ -120,7 +120,7 @@ Week 3 deliverable complete: Gold star schema, benchmarks, deviation scores and 
 | `gold_hospital_index` | Rows | 21 | 2,862 (2,906 minus 44 Maryland) | 2,862 |
 | `gold_hospital_index` | Σ payment / Σ expected | 22 | national index 1.104 | 1.10419 |
 | `gold_hospital_index` | Low-DRG hospitals flagged | 23 | 0 | 0 |
-| `gold_hospital_index` | Q1 / Q3 / upper fence | 24 | 0.889 / 1.140 / 1.891 | 0.88941 / 1.13978 / 1.89087 |
+| `gold_hospital_index` | Q1 / Q3 / upper threshold | 24 | 0.889 / 1.140 / 1.891 | 0.88941 / 1.13978 / 1.89087 |
 | `gold_hospital_index` | Hospitals flagged | 25 | small share of 2,493 eligible | 51 (2.0%) |
 | `gold_hospital_index` | Low-DRG hospitals / Week 3 outlier cells | 19 | 370 / 2,358 in Week 3 (Maryland included) | 369 / 1,922 (the 370th low-DRG hospital and the other 436 flagged cells are Maryland's) |
 | `gold_ruca_summary` | Rows per grain (an unmapped code would add a sixth group) | 28 | 5 / 3 / 1 | 5 / 3 / 1 |

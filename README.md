@@ -17,10 +17,10 @@ From the approved IMT 600 proposal. The data will refine these.
 
 | ID | Hypothesis | Status |
 |---|---|---|
-| H1 | Cost varies more by hospital than by region or severity | Partly answered (Week 4): state payment index spans 0.84 to 1.45, hospital index 0.61 to 9.95. Formal test in Week 6 |
-| H2 | Higher-cost hospitals do not have higher quality ratings | Week 6. Data ready: 2,517 inpatient hospitals with a 1 to 5 star rating |
-| H3 | For-profit hospitals show higher charge-to-payment markups | Week 6. Data ready: 1,875 non-profit, 631 for-profit, 393 government inpatient hospitals |
-| H4 | Rural and urban hospitals differ in cost for the same procedure | Answered (Week 4): urban paid 41% more per discharge raw, 11% more after case-mix adjustment. Significance test in Week 6 |
+| H1 | Cost varies more by hospital than by region or severity | Supported (Week 6): 39% of the variation in log payment index is between states (95% CI 35% to 45%) and 61% is between hospitals in the same state |
+| H2 | Higher-cost hospitals do not have higher quality ratings | Supported (Week 6): star-rating groups differ only slightly (medians 0.94 to 1.03; Spearman rho -0.08, 95% CI -0.12 to -0.04) and the gaps largely disappear once wage, teaching and DSH are accounted for |
+| H3 | For-profit hospitals show higher charge-to-payment markups | Supported (Week 6): median markup 6.6x for-profit vs 4.0x non-profit and 3.3x government (Kruskal-Wallis p < 0.001), yet for-profit hospitals have the lowest payment index (0.94) |
+| H4 | Rural and urban hospitals differ in cost for the same procedure | Mixed (Week 6): no clear difference for the typical hospital (medians 0.99 vs 0.98, Mann-Whitney p = 0.06); the average urban hospital is paid 5.7% more (95% CI 3.2% to 8.2%), driven by a small group of high-index urban hospitals. Raw gap 41%, payment-weighted 11% (Week 4) |
 
 ## Data sources
 
@@ -72,7 +72,7 @@ silver_cms_inpatient                         silver_hospital_info           Silv
    ▼                                            ▼
 gold_* star schema and aggregates  ◄── ccn ──  gold_dim_hospital_profile    Gold: joined on CCN
    │
-   ├──► Python analysis: hypothesis tests and regression (06_python_analysis.ipynb, Week 6)
+   ├──► Python analysis: H1 to H4 tests, before/after regression, clusters, exports (06_python_analysis.ipynb, Week 6)
    ├──► Tableau dashboard (Weeks 7-8)
    └──► Written findings report with one recommendation (Week 9)
 ```
@@ -83,13 +83,13 @@ gold_* star schema and aggregates  ◄── ccn ──  gold_dim_hospital_profi
 cms-medicare-cost-variation/
 ├── README.md
 ├── .gitignore
-├── notebooks/          Databricks notebooks (01 and 02 as source .py, 03 onward as .ipynb; 04 and 05 saved with outputs; importable via Repos)
+├── notebooks/          Databricks notebooks (01 and 02 as source .py, 03 onward as .ipynb; 03 to 06 saved with outputs; importable via Repos)
 │   ├── 01_bronze_ingest.py
 │   ├── 02_silver_transform.py
 │   ├── 03_gold_star_schema.ipynb
 │   ├── 04_gold_aggregates.ipynb
 │   ├── 05_hospital_info.ipynb       Second dataset: Bronze, Silver, Gold join (Week 5)
-│   └── 06_python_analysis.ipynb     Hypothesis tests and regression (Week 6, planned)
+│   └── 06_python_analysis.ipynb     H1 to H4 tests, before/after regression, clusters, exports (Week 6)
 ├── scripts/            Local Python utilities
 │   └── profile_raw_csv.py
 ├── docs/               Project documentation
@@ -97,7 +97,7 @@ cms-medicare-cost-variation/
 │   ├── data_quality_log.md
 │   ├── gold_build_log.md
 │   ├── silver_cleaning_log.md
-│   ├── run_evidence/   HTML exports of each Databricks notebook run, with all outputs (01 to 05)
+│   ├── run_evidence/   HTML exports of each Databricks notebook run, with all outputs (01 to 06)
 │   └── profile_output.json
 ├── data/raw/           Local copies of both source CSVs (git-ignored)
 ├── dashboards/         Tableau workbook (Weeks 7-8)
@@ -215,6 +215,26 @@ Every table reconciles to the Silver totals to the cent. Key findings: state ind
 
 **Result.** Every matched hospital is an Acute Care Hospital. Ownership: 1,875 non-profit, 631 for-profit, 393 government. Star ratings: 2,517 rated 1 to 5 (1: 250, 2: 529, 3: 750, 4: 677, 5: 311) and 382 Unrated. Profiling of the file is in section 10 of [`docs/data_profiling_notes.md`](docs/data_profiling_notes.md), and the decisions are in [`docs/data_quality_log.md`](docs/data_quality_log.md) (DQ-24, DQ-25).
 
+## Python analysis (Week 6)
+
+**The one question.** For a comparable mix of stays, why does Medicare pay some hospitals more than others, and how much of that gap is Medicare paying more by design (local wages, teaching, care for low-income patients)?
+
+**Notebook.** `notebooks/06_python_analysis.ipynb` (pandas, NumPy, SciPy, statsmodels, scikit-learn on Databricks Serverless). It reads the Gold tables plus three columns of the CMS FY 2024 IPPS Final Rule Impact File (wage index, resident-to-bed ratio, DSH share), which is read directly in pandas rather than through Bronze/Silver/Gold because it is a set of control variables, not a core dataset. Analysis frame: 2,493 non-Maryland hospitals with at least 5 DRGs; models: 2,476 hospitals with complete attributes.
+
+| Step | Cells | Result |
+|---|---|---|
+| Payment index spread | 4 | Median 0.988 (95% CI 0.978 to 0.995); mean 1.064; 47.1% of hospitals above 1.0 (CI 45.1% to 49.0%) |
+| H1 to H4 | 5 to 8 | See the hypotheses table above |
+| Factor scatter plots | 9 | Spearman rho with the index: wage index 0.60, teaching 0.43, DSH 0.42, markup -0.15 |
+| Before vs after Medicare's adjustments | 10a, 10b | OLS on log(payment index), HC3 robust SEs. Before (rating, ownership, urban/rural, region): R² 0.27. After (+ wage, teaching, DSH): R² 0.69. Region and star-rating gaps largely disappear; government +11.7% to +5.4% and for-profit -5.4% to -3.4% remain; rural flips from -0.9% to +8.5% |
+| Model checks | 10c | VIF 1.1 to 1.3; discharge-weighted WLS (R² 0.81) keeps the factor and for-profit results, while the government and rural premiums roughly halve |
+| Hospitals left over | 10d | 27 hospitals paid more than 49% above their predicted index (residual above Q3 + 3 x IQR, same rule as Week 4); 28 of the 51 Week 4 outliers are explained by the adjustments |
+| Clusters | 11 | k-means on wage, teaching and DSH, k = 3 by silhouette (0.519): Typical (1,886, median index 0.94), High-wage (346, 1.25), Teaching (244, 1.34) |
+| Exports | 12, 13 | Delta tables `gold_python_hospital_results` (2,493 x 28) and `gold_python_before_after`; CSVs in `/Volumes/workspace/cms/exports/` including the 27-hospital research list |
+| Slide figures | 14a to 14j | One chart per decision, saved as PNG in `/Volumes/workspace/cms/exports/figures/` |
+
+Run evidence: [`docs/run_evidence/2026-11-23_06_python_analysis.html`](docs/run_evidence/2026-11-23_06_python_analysis.html). Decisions are in [`docs/data_quality_log.md`](docs/data_quality_log.md) (DQ-26 to DQ-28 and the Week 6 decision rows).
+
 ## Weekly roadmap
 
 | Week | Focus | Status |
@@ -224,7 +244,7 @@ Every table reconciles to the Silver totals to the cent. Key findings: state ind
 | 3 | Gold star schema; per-DRG medians and hospital deviation | Done (2026-10-27) |
 | 4 | Gold by state/region, hospital outliers, RUCA rural/urban | Done (2026-11-02) |
 | 5 | Second dataset: Hospital General Information Bronze, Silver, and CCN join to Gold (completes LO1) | Done (2026-11-03) |
-| 6 | Python: H1 to H4 hypothesis tests; regression of cost on quality, ownership and location; residual-ranked hospitals | Planned (Nov 4 to 10) |
+| 6 | Python: H1 to H4 hypothesis tests; regression of cost on quality, ownership and location; residual-ranked hospitals | Done (2026-11-23) |
 | 7 | Sense-check findings with data and healthcare contacts; Tableau prototype (v1) | Planned (Nov 11 to 17) |
 | 8 | Tableau dashboard v2 for a non-technical viewer | Planned (Nov 18 to 24) |
 | 9 | Short report draft with one recommendation | Planned (Nov 25 to Dec 1) |
@@ -238,6 +258,10 @@ Every table reconciles to the Silver totals to the cent. Key findings: state ind
 - **Python analysis moved from Weeks 4 and 5 to Week 6.** The hypothesis tests (proposal Week 4) and the regression with residual ranking (proposal Week 5) both need ownership and star ratings, which were only joined in Week 5. Both now run in Week 6, about two weeks later than planned.
 - **Sense-check conversations moved from Week 6 to Week 7**, so they can discuss regression results rather than early numbers. Tableau v1 stays in Week 7, and Weeks 8 to 11 are unchanged.
 - **Overall:** the deliverables and learning outcomes are the same as proposed; the delay is absorbed by combining the two Python weeks into Week 6 and running the conversations alongside the Tableau prototype.
+- **Python analysis finished 2026-11-23**, about two weeks after the proposal's Week 6. The Tableau dashboard(s) and the written report follow in the next weeks.
+- **Regression framed as before vs after Medicare's adjustments.** The proposal's regression of cost on quality, ownership and location is the "before" model; the "after" model adds the FY 2024 wage index, teaching and DSH share from the IPPS Impact File, so the comparison shows which gaps Medicare's own payment rules explain. Residual ranking uses the after model.
+- **Statistical confidence added throughout** on the supervisor's advice: medians and shares with 95% bootstrap CIs, rank-based tests (Kruskal-Wallis, Mann-Whitney, Spearman), and a discharge-weighted sensitivity check.
+- **Hospital clusters added** (k-means on the three adjustment factors) to group hospitals for the dashboard; not in the proposal.
 - **CCN normalization:** the proposal expected the inpatient file to have lost leading zeros. Reading every column as text in Bronze preserved them, and Silver enforces a 6-digit format (DQ-02), so the join needs no padding.
 
 ## AI assistance
@@ -252,6 +276,8 @@ This project uses Claude (Anthropic) as a coding and writing assistant. To be tr
 | 4 (2026-11-02) | Example SQL for cells 2 to 17; from cell 18, hints, review, one skeleton (cell 27) and corrected lines when I was stuck (cells 20, 33); comment headers and documentation | Chose and own every design decision (case-mix-adjusted payment index, all benchmarks with a non-thin sensitivity check, hospital outlier rule, binary urban/rural headline, Census regions, Maryland handling); adapted, ran, debugged and verified every cell, including fixing syntax errors and restructuring check cells; wrote cells 18 onward myself (hospital index with a multi-key join that avoids fan-out, outlier thresholds, RUCA checks, sensitivity check, payment variation query); caught a misread in review; interpreted all results and findings |
 | 5 (2026-11-02) | Compared the repo to my proposal; previewed the new file; drafted the revised roadmap, design questions, notebook 05 cells 1 to 4 and docs at my request | Made the approved proposal the roadmap and required both datasets; made every design decision (snapshot, unrated hospitals, ownership groups, unmatched hospitals, separate profile table); located and uploaded the data to Databricks; resolved a Git merge conflict between Databricks and GitHub without losing the Week 4 notebook |
 | 5 (2026-11-03) | Found the 2024 snapshot at my request; fixed the Cell 4 write; updated cell headers; comment outlines, review and corrected lines when I was stuck (cells 8, 11a); typed up documentation | Chose to switch to the 2024 snapshot inside the claims year and to keep the 7 unmatched hospitals; wrote cells 5 to 11c myself: Bronze key checks, category profiles, join preview and unmatched list, the Silver table with ownership mapping and rating typing, the Gold hospital profile, and all row, key, mapping and rating checks; worked through my own errors (column vs text quoting, LIKE wildcards, CASE syntax, table aliases); moved the notebook to Serverless compute, ran and verified every cell, committed each stage, exported the run evidence and reviewed the documentation |
+| 6 (2026-11-03 to 11-04) | Proposed the notebook outline and design questions; code skeletons with blanks for cells 0 to 2; review | Chose the outcome, models, estimation and exclusions; filled in and debugged cells 0 to 2 myself (loading the Gold tables, fixing DECIMAL types, reading the IPPS Impact File and checking the CCN match) |
+| 6 (2026-11-18 to 11-23) | Cell structure with blanks for cells 3 to 11, with the error-prone parts written in (bootstrap loops, test and table helpers, regression formula, diagnostics, cluster scoring); wrote cells 12 and 13 and the figure cells 14 to 14j; reworded comments at my request; typed up documentation | Decided to keep the regression and framed it as before vs after Medicare's adjustments after the supervisor's feedback; chose H3 in full, the comparison groups, the outlier threshold and k = 3; filled in the data choices in cells 3 to 11, fixed my own errors (column names, typos), ran and checked every cell; wrote the notebook's title cell; exported the notebook and run evidence |
 
 All results in this repo come from runs I performed in Databricks; `docs/run_evidence/` holds the exported notebooks with their outputs.
 
